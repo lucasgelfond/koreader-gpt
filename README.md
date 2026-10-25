@@ -2,6 +2,8 @@
 
 Run GPT-2 on a KOReader-jailbroken Kindle.
 
+<img src="docs/demo.gif" alt="GPT-2 writing on a Kindle Scribe" width="440">
+
 This plugin lets you run GPT-2 inference on a Kindle. Tested on my Kindle Scribe, running ~13 tok/sec at 4-bit quantization.
 
 Can open this on a highlight (tap highlighted text --> Continue with GPT-2) or as a standalone chat (Tools --> GPT-2 --> Write from a prompt).
