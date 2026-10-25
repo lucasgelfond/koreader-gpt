@@ -1,0 +1,6 @@
+build/
+gpt2.koplugin/llama-completion
+gpt2.koplugin/*.gguf
+gpt2.koplugin/prompt.txt
+gpt2.koplugin/output.txt
+.DS_Store
