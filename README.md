@@ -1,36 +1,19 @@
 # koreader-gpt
 
-GPT-2 running on a Kindle, inside KOReader. Nothing leaves the device: the model (GPT-2 small, 124M parameters, quantized to 4 bits) runs in a static build of llama.cpp's `llama-completion`, at about 13 tokens a second on a Kindle Scribe.
+Run GPT-2 on a KOReader-jailbroken Kindle.
 
-- **Continue a highlight:** tap a highlight → **…** → **Continue with GPT-2**
-- **Continue the page:** Tools → GPT-2 → **Continue this page** (also a gesture action)
-- **Write from a prompt:** Tools → GPT-2 → **Write from a prompt…** (works from the file browser too)
+This plugin lets you run GPT-2 inference on a Kindle. Tested on my Kindle Scribe, running ~13 tok/sec at 4-bit quantization.
 
-A GPT-2 window opens and fills in as the model writes, with your text in grey and GPT-2's in bold. **Stop** ends it early; afterwards **Try again** rerolls and **Keep going** writes more. Length (40/80/160 tokens) and temperature are in the same menu.
+Can open this on a highlight (tap highlighted text --> Continue with GPT-2) or as a standalone chat (Tools --> GPT-2 --> Write from a prompt).
 
-## Build
+To install, first use another tutorial to install KOReader on the Kindle. Then, start KOReader's SSH server first without password protection. Basically, click Tools --> Network --> SSH Server --> click "Login without password (DANGEROUS)" and then enable the SSH server. When on your laptop, find the device, and add your laptop's public key to the `koreader/settings/SSH/authorized_keys` path. Then turn off the SSH server on the Kindle, uncheck "Login without password", check "Login with key only", and then turn the SSH server back on.
 
-Needs git, cmake, ninja and [uv](https://docs.astral.sh/uv/) (Zig, the cross compiler, is fetched from PyPI):
+After that, simply run `scripts/install.sh` to install the plugin. It should be
 
-```sh
-scripts/build.sh
+```
+scripts/install.sh KINDLE_IP # port 2222 unless changed
 ```
 
-This builds `llama-completion` for 32-bit ARM hard-float (`arm-linux-musleabihf`, statically linked, so it doesn't depend on the Kindle's libc), downloads GPT-2 from Hugging Face, converts it to GGUF and quantizes it to Q4_0. Both land in `gpt2.koplugin/`.
+You can also copy the `gpt2.koplugin` into `koreader/plugins` over USB but that's more annoying.
 
-## Install
-
-On a jailbroken Kindle with KOReader, start KOReader's SSH server (Tools → Network → SSH server) with your key in `koreader/settings/SSH/authorized_keys`, then:
-
-```sh
-scripts/install.sh KINDLE_IP        # port 2222 unless given
-```
-
-Or copy the `gpt2.koplugin` folder into `koreader/plugins/` over USB. Restart KOReader.
-
-## Notes
-
-- **Memory.** A Kindle Scribe has 964 MB of RAM but only ~240 MB free with KOReader open. Q4_0 (85 MB) fits; Q8_0 (137 MB) thrashes and drops to one token every few seconds.
-- **CPU target.** The Scribe's cores are Cortex-A53, but the userland is 32-bit, and targeting `cortex_a53` in 32-bit mode makes the compiler define NEON intrinsics that ggml also defines for ARMv7. The build targets `cortex_a7` (ARMv7 + NEON + VFPv4).
-- **Converter patch.** `patches/llama-gpt2-convert.patch` fixes llama.cpp's GPT-2 converter (at the pinned commit), which tried to map the attention mask buffers it means to skip.
-- GPT-2 is a 2019 base model: fluent, not instruction-following.
+Once you've installed you'll need to restart KOReader to see the changes (right corner hamburger menu --> Exit --> Restart KOReader).
